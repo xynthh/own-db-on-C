@@ -1,0 +1,3 @@
+D:/Dev/tmp/own db on C/cmake-build-debug/CMakeFiles/own_db_on_C.dir
+D:/Dev/tmp/own db on C/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Dev/tmp/own db on C/cmake-build-debug/CMakeFiles/rebuild_cache.dir
