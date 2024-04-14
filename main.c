@@ -262,6 +262,7 @@ void add_student(Student students[]) {
 
   Student new_student;
   new_student.id = input_id(students);
+  new_student.original_index = index;
   input_name(new_student.name);
   input_surname(new_student.surname);
   input_age(&new_student.age);
@@ -274,8 +275,8 @@ void add_student(Student students[]) {
 // -----Добавление студента в базу данных-----
 
 // -----Вывод базы данных-----
-void print_student(Student student, int index) {
-  printf("%4d | %6d | %-20s | %-20s | %10d | %-20s | %12.2f |\n", index + 1, student.id, student.name, student.surname,
+void print_student(Student student) {
+  printf("%4d | %6d | %-20s | %-20s | %10d | %-20s | %12.2f |\n", student.original_index + 1, student.id, student.name, student.surname,
          student.age, student.faculty, student.gpa);
 }
 
@@ -293,7 +294,7 @@ void print_database(Student students[]) {
   print_database_header();
   for (int i = 0; i < MAX_STUDENTS; i++) {
     if (strlen(students[i].name) != 0) {
-      print_student(students[i], i);
+      print_student(students[i]);
     }
   }
   print_database_footer();
@@ -426,7 +427,7 @@ void search_students(Student students[], char *column, double from, double to) {
   printf("Поиск студентов по столбцу %s с ограничением от %.2f до %.2f:\n", column, from, to);
   print_database_header();
   for (int i = 0; i < temp_index; i++) {
-    print_student(temp_students[i], i);
+    print_student(temp_students[i]);
   }
   print_database_footer();
 }

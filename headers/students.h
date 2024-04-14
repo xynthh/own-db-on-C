@@ -5,6 +5,7 @@
 
 typedef struct {
     int id; // ID студента
+    int original_index; // Индекс студента в массиве
     char name[50]; // Имя студента
     char surname[50]; // Фамилия студента
     int age; // Возраст студента
@@ -27,7 +28,7 @@ void input_age(int *age);
 void input_faculty(char *faculty);
 void input_gpa(double *gpa);
 void add_student(Student students[]);
-void print_student(Student student, int index);
+void print_student(Student student);
 void print_database_header();
 void print_database_footer();
 void print_database(Student students[]);
