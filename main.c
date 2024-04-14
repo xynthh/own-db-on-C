@@ -26,11 +26,7 @@ int main() {
           while (1) {
             add_student(students);
             printf("Добавить еще одного студента? (1 - да, 0 - нет): ");
-            int add_more;
-            scanf_s("%d", &add_more);
-            clear_input_buffer();
-            clear_screen();
-            if (!add_more) break;
+            if (get_user_choice() != 1) break;
           }
         }
         continue_program();
@@ -176,7 +172,7 @@ int input_id(Student students[]) {
 
 void input_name(char *name) {
   do {
-    printf("Введите имя студента: ");
+    printf("\nВведите имя студента: ");
     user_input();
     fgets(name, 50, stdin);
     char *newline = strrchr(name, '\n');
@@ -193,7 +189,7 @@ void input_name(char *name) {
 
 void input_surname(char *surname) {
   do {
-    printf("Введите фамилию студента: ");
+    printf("\nВведите фамилию студента: ");
     user_input();
     fgets(surname, 50, stdin);
     char *newline = strrchr(surname, '\n');
@@ -210,7 +206,7 @@ void input_surname(char *surname) {
 
 void input_age(int *age) {
   do {
-    printf("Введите возраст студента: ");
+    printf("\nВведите возраст студента: ");
     user_input();
     scanf_s("%d", age);
     clear_input_buffer();
@@ -224,7 +220,7 @@ void input_age(int *age) {
 
 void input_faculty(char *faculty) {
   do {
-    printf("Введите факультет студента: ");
+    printf("\nВведите факультет студента: ");
     user_input();
     fgets(faculty, 100, stdin);
     char *newline = strrchr(faculty, '\n');
@@ -241,7 +237,7 @@ void input_faculty(char *faculty) {
 
 void input_gpa(double *gpa) {
   do {
-    printf("Введите средний балл студента: ");
+    printf("\nВведите средний балл студента: ");
     user_input();
     scanf_s("%lf", gpa);
     clear_input_buffer();
