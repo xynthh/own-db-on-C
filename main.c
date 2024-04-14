@@ -132,6 +132,7 @@ void continue_program() {
 void initialize_database(Student students[]) {
   for (int i = 0; i < MAX_STUDENTS; i++) {
     students[i].id = 0;
+    students[i].original_index = 0;
     students[i].name[0] = '\0';
     students[i].surname[0] = '\0';
     students[i].age = 0;
@@ -272,18 +273,23 @@ void add_student(Student students[]) {
 
 // -----Вывод базы данных-----
 void print_student(Student student) {
-  printf("%4d | %6d | %-20s | %-20s | %10d | %-20s | %12.2f |\n", student.original_index + 1, student.id, student.name, student.surname,
+  printf("%4d | %6d | %-20s | %-20s | %10d | %-20s | %12.2f |\n", student.original_index + 1, student.id, student.name,
+         student.surname,
          student.age, student.faculty, student.gpa);
 }
 
 void print_database_header() {
-  printf("------------------------------------------------------------------------------------------------------------------------\n");
-  printf("   № |     ID | Имя студента         | Фамилия студента     | Возраст    | Факультет            | Средний балл |\n");
-  printf("------------------------------------------------------------------------------------------------------------------------\n");
+  printf(
+    "------------------------------------------------------------------------------------------------------------------------\n");
+  printf(
+    "   № |     ID | Имя студента         | Фамилия студента     | Возраст    | Факультет            | Средний балл |\n");
+  printf(
+    "------------------------------------------------------------------------------------------------------------------------\n");
 }
 
 void print_database_footer() {
-  printf("------------------------------------------------------------------------------------------------------------------------\n");
+  printf(
+    "------------------------------------------------------------------------------------------------------------------------\n");
 }
 
 void print_database(Student students[]) {
@@ -308,6 +314,7 @@ void delete_student(Student students[]) {
   for (int i = 0; i < MAX_STUDENTS; i++) {
     if (students[i].id == id_to_delete) {
       students[i].id = 0;
+      students[i].original_index = 0;
       students[i].name[0] = '\0';
       students[i].surname[0] = '\0';
       students[i].age = 0;
