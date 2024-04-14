@@ -39,6 +39,6 @@ void to_string(int, char *str);
 int id_exists(Student students[], int);
 void save_database(Student students[]);
 void load_database(Student students[]);
-void search_students(Student students[], char *column, double from, double to);
+void search_students(Student students[], char *column, char* str_from, char* str_to, double num_from, double num_to);
 
 #endif //MAIN_C_STUDENTS_H

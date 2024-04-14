@@ -28,7 +28,7 @@ CMAKE_BUILD_TYPE:STRING=Debug
 CMAKE_COLOR_DIAGNOSTICS:BOOL=ON
 
 //C compiler
-CMAKE_C_COMPILER:STRING=C:/Program Files/JetBrains/CLion 2023.3.4/bin/mingw/bin/gcc.exe
+CMAKE_C_COMPILER:FILEPATH=C:/Program Files/JetBrains/CLion 2023.3.4/bin/mingw/bin/gcc.exe
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -90,7 +90,7 @@ CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/own_db_on_C
 CMAKE_LINKER:FILEPATH=C:/Program Files/JetBrains/CLion 2023.3.4/bin/mingw/bin/ld.exe
 
 //make program
-CMAKE_MAKE_PROGRAM:FILEPATH=C:/PROGRA~1/JETBRA~1/CLION2~1.4/bin/ninja/win/x64/ninja.exe
+CMAKE_MAKE_PROGRAM:FILEPATH=C:/Program Files/JetBrains/CLion 2023.3.4/bin/ninja/win/x64/ninja.exe
 
 //Flags used by the linker during the creation of modules during
 // all build types.

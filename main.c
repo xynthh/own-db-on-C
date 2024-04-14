@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <windows.h>
 #include "headers/students.h"
 
@@ -55,19 +56,38 @@ int main() {
         break;
       case 8: {
         char column[50];
-        double from, to;
-        printf("Введите столбец для поиска (id, age, gpa): ");
+        char str_from[50] = "", str_to[50] = "";
+        double num_from = 0, num_to = 0;
+
+        printf("Введите столбец для поиска (id, age, gpa, faculty, name, surname): ");
         fgets(column, 50, stdin);
         char *newline = strrchr(column, '\n');
         if (newline) {
           *newline = '\0'; // Удаление символа новой строки
         }
-        printf("Введите нижнюю границу диапазона: ");
-        scanf_s("%lf", &from);
-        printf("Введите верхнюю границу диапазона: ");
-        scanf_s("%lf", &to);
-        clear_input_buffer();
-        search_students(students, column, from, to);
+
+        if (strcmp(column, "faculty") == 0 || strcmp(column, "name") == 0 || strcmp(column, "surname") == 0) {
+          printf("Введите начальное значение для поиска: ");
+          fgets(str_from, 50, stdin);
+          newline = strrchr(str_from, '\n');
+          if (newline) {
+            *newline = '\0'; // Удаление символа новой строки
+          }
+          printf("Введите конечное значение для поиска: ");
+          fgets(str_to, 50, stdin);
+          newline = strrchr(str_to, '\n');
+          if (newline) {
+            *newline = '\0'; // Удаление символа новой строки
+          }
+        } else {
+          printf("Введите нижнюю границу диапазона: ");
+          scanf_s("%lf", &num_from);
+          printf("Введите верхнюю границу диапазона: ");
+          scanf_s("%lf", &num_to);
+          clear_input_buffer();
+        }
+
+        search_students(students, column, str_from, str_to, num_from, num_to);
         continue_program();
         break;
       }
@@ -415,19 +435,23 @@ void load_database(Student students[]) {
 }
 
 // Поиск студентов по столбцу
-void search_students(Student students[], char *column, double from, double to) {
+void search_students(Student students[], char *column, char* str_from, char* str_to, double num_from, double num_to) {
   Student temp_students[MAX_STUDENTS];
   int temp_index = 0;
 
   for (int i = 0; i < MAX_STUDENTS; i++) {
-    if ((strcmp(column, "id") == 0 && students[i].id >= from && students[i].id <= to) ||
-        (strcmp(column, "age") == 0 && students[i].age >= from && students[i].age <= to) ||
-        (strcmp(column, "gpa") == 0 && students[i].gpa >= from && students[i].gpa <= to)) {
+    if (strlen(students[i].name) != 0 &&
+        ((strcmp(column, "id") == 0 && students[i].id >= num_from && students[i].id <= num_to) ||
+         (strcmp(column, "age") == 0 && students[i].age >= num_from && students[i].age <= num_to) ||
+         (strcmp(column, "gpa") == 0 && students[i].gpa >= num_from && students[i].gpa <= num_to) ||
+         (strcmp(column, "faculty") == 0 && (strncasecmp(students[i].faculty, str_from, strlen(str_from)) >= 0 && strncasecmp(students[i].faculty, str_to, strlen(str_to)) <= 0)) ||
+         (strcmp(column, "name") == 0 && (strncasecmp(students[i].name, str_from, strlen(str_from)) >= 0 && strncasecmp(students[i].name, str_to, strlen(str_to)) <= 0)) ||
+         (strcmp(column, "surname") == 0 && (strncasecmp(students[i].surname, str_from, strlen(str_from)) >= 0 && strncasecmp(students[i].surname, str_to, strlen(str_to)) <= 0)))) {
       temp_students[temp_index++] = students[i];
     }
   }
 
-  printf("Поиск студентов по столбцу %s с ограничением от %.2f до %.2f:\n", column, from, to);
+  printf("Поиск студентов по столбцу %s с ограничением от %s до %s:\n", column, str_from, str_to);
   print_database_header();
   for (int i = 0; i < temp_index; i++) {
     print_student(temp_students[i]);
