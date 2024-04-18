@@ -13,6 +13,14 @@ typedef struct {
     double gpa; // Средний балл студента
 } Student;
 
+typedef struct {
+    char column[50];
+    char str_from[50];
+    char str_to[50];
+    double num_from;
+    double num_to;
+} SearchFilter;
+
 void user_input();
 void print_menu();
 int get_user_choice();
@@ -39,6 +47,6 @@ void to_string(int, char *str);
 int id_exists(Student students[], int);
 void save_database(Student students[]);
 void load_database(Student students[]);
-void search_students(Student students[], char *column, char* str_from, char* str_to, double num_from, double num_to);
+void search_students(Student students[], SearchFilter filters[], int filters_count);
 
 #endif //MAIN_C_STUDENTS_H

@@ -55,39 +55,61 @@ int main() {
         continue_program();
         break;
       case 8: {
-        char column[50];
-        char str_from[50] = "", str_to[50] = "";
-        double num_from = 0, num_to = 0;
+        SearchFilter filters[MAX_STUDENTS];
+        int filters_count = 0;
 
-        printf("Введите столбец для поиска (id, age, gpa, faculty, name, surname): ");
-        fgets(column, 50, stdin);
-        char *newline = strrchr(column, '\n');
-        if (newline) {
-          *newline = '\0'; // Удаление символа новой строки
-        }
+        while (1) {
+          char column[50];
+          char str_from[50] = "", str_to[50] = "";
+          double num_from = 0, num_to = 0;
 
-        if (strcmp(column, "faculty") == 0 || strcmp(column, "name") == 0 || strcmp(column, "surname") == 0) {
-          printf("Введите начальное значение для поиска: ");
-          fgets(str_from, 50, stdin);
-          newline = strrchr(str_from, '\n');
+          printf("Введите столбец для поиска (id, age, gpa, faculty, name, surname): ");
+          fgets(column, 50, stdin);
+          char *newline = strrchr(column, '\n');
           if (newline) {
             *newline = '\0'; // Удаление символа новой строки
           }
-          printf("Введите конечное значение для поиска: ");
-          fgets(str_to, 50, stdin);
-          newline = strrchr(str_to, '\n');
-          if (newline) {
-            *newline = '\0'; // Удаление символа новой строки
+
+          if (strcmp(column, "faculty") == 0 || strcmp(column, "name") == 0 || strcmp(column, "surname") == 0) {
+            printf("Введите начальное значение для поиска: ");
+            fgets(str_from, 50, stdin);
+            newline = strrchr(str_from, '\n');
+            if (newline) {
+              *newline = '\0'; // Удаление символа новой строки
+            }
+            printf("Введите конечное значение для поиска: ");
+            fgets(str_to, 50, stdin);
+            newline = strrchr(str_to, '\n');
+            if (newline) {
+              *newline = '\0'; // Удаление символа новой строки
+            }
+          } else {
+            printf("Введите нижнюю границу диапазона: ");
+            scanf_s("%lf", &num_from);
+            printf("Введите верхнюю границу диапазона: ");
+            scanf_s("%lf", &num_to);
+            clear_input_buffer();
           }
-        } else {
-          printf("Введите нижнюю границу диапазона: ");
-          scanf_s("%lf", &num_from);
-          printf("Введите верхнюю границу диапазона: ");
-          scanf_s("%lf", &num_to);
-          clear_input_buffer();
+
+          SearchFilter filter;
+          strcpy(filter.column, column);
+          strcpy(filter.str_from, str_from);
+          strcpy(filter.str_to, str_to);
+          filter.num_from = num_from;
+          filter.num_to = num_to;
+
+          filters[filters_count++] = filter;
+
+          printf("Добавить еще один фильтр? (1 - да, 0 - нет): ");
+          if (get_user_choice() != 1) {
+            printf("\nВсе фильтры добавлены.\n");
+            break;
+          } else {
+            printf("\n");
+          }
         }
 
-        search_students(students, column, str_from, str_to, num_from, num_to);
+        search_students(students, filters, filters_count);
         continue_program();
         break;
       }
@@ -435,23 +457,41 @@ void load_database(Student students[]) {
 }
 
 // Поиск студентов по столбцу
-void search_students(Student students[], char *column, char* str_from, char* str_to, double num_from, double num_to) {
+void search_students(Student students[], SearchFilter filters[], int filters_count) {
   Student temp_students[MAX_STUDENTS];
   int temp_index = 0;
 
   for (int i = 0; i < MAX_STUDENTS; i++) {
-    if (strlen(students[i].name) != 0 &&
-        ((strcmp(column, "id") == 0 && students[i].id >= num_from && students[i].id <= num_to) ||
-         (strcmp(column, "age") == 0 && students[i].age >= num_from && students[i].age <= num_to) ||
-         (strcmp(column, "gpa") == 0 && students[i].gpa >= num_from && students[i].gpa <= num_to) ||
-         (strcmp(column, "faculty") == 0 && (strncasecmp(students[i].faculty, str_from, strlen(str_from)) >= 0 && strncasecmp(students[i].faculty, str_to, strlen(str_to)) <= 0)) ||
-         (strcmp(column, "name") == 0 && (strncasecmp(students[i].name, str_from, strlen(str_from)) >= 0 && strncasecmp(students[i].name, str_to, strlen(str_to)) <= 0)) ||
-         (strcmp(column, "surname") == 0 && (strncasecmp(students[i].surname, str_from, strlen(str_from)) >= 0 && strncasecmp(students[i].surname, str_to, strlen(str_to)) <= 0)))) {
-      temp_students[temp_index++] = students[i];
+    if (strlen(students[i].name) != 0) {
+      int matches_all_filters = 1;
+      for (int j = 0; j < filters_count; j++) {
+        SearchFilter filter = filters[j];
+        if (!(
+          (strcmp(filter.column, "id") == 0 && students[i].id >= filter.num_from && students[i].id <= filter.num_to) ||
+          (strcmp(filter.column, "age") == 0 && students[i].age >= filter.num_from &&
+           students[i].age <= filter.num_to) ||
+          (strcmp(filter.column, "gpa") == 0 && students[i].gpa >= filter.num_from &&
+           students[i].gpa <= filter.num_to) ||
+          (strcmp(filter.column, "faculty") == 0 &&
+           (strncasecmp(students[i].faculty, filter.str_from, strlen(filter.str_from)) >= 0 &&
+            strncasecmp(students[i].faculty, filter.str_to, strlen(filter.str_to)) <= 0)) ||
+          (strcmp(filter.column, "name") == 0 &&
+           (strncasecmp(students[i].name, filter.str_from, strlen(filter.str_from)) >= 0 &&
+            strncasecmp(students[i].name, filter.str_to, strlen(filter.str_to)) <= 0)) ||
+          (strcmp(filter.column, "surname") == 0 &&
+           (strncasecmp(students[i].surname, filter.str_from, strlen(filter.str_from)) >= 0 &&
+            strncasecmp(students[i].surname, filter.str_to, strlen(filter.str_to)) <= 0)))) {
+          matches_all_filters = 0;
+          break;
+        }
+      }
+      if (matches_all_filters) {
+        temp_students[temp_index++] = students[i];
+      }
     }
   }
 
-  printf("Поиск студентов по столбцу %s с ограничением от %s до %s:\n", column, str_from, str_to);
+  printf("Поиск студентов по заданным фильтрам:\n");
   print_database_header();
   for (int i = 0; i < temp_index; i++) {
     print_student(temp_students[i]);
