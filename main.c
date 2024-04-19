@@ -30,29 +30,36 @@ int main() {
             if (get_user_choice() != 1) break;
           }
         }
-        continue_program();
         break;
       case 2:
         print_database(students);
         break;
       case 3:
         add_student(students);
-        continue_program();
         break;
-      case 4:
-        sort_students_by_gpa_and_print(students);
+      case 4: {
+        char column[50];
+        int order;
+        printf("Введите столбец для сортировки (id, age, gpa, faculty, name, surname): ");
+        fgets(column, 50, stdin);
+        char *newline = strrchr(column, '\n');
+        if (newline) {
+          *newline = '\0'; // Удаление символа новой строки
+        }
+        printf("Введите порядок сортировки (1 - по возрастанию, 0 - по убыванию): ");
+        scanf_s("%d", &order);
+        clear_input_buffer();
+        sort_students(students, column, order);
         break;
+      }
       case 5:
         delete_student(students);
-        continue_program();
         break;
       case 6:
         save_database(students);
-        continue_program();
         break;
       case 7:
         load_database(students);
-        continue_program();
         break;
       case 8: {
         SearchFilter filters[MAX_STUDENTS];
@@ -110,7 +117,6 @@ int main() {
         }
 
         search_students(students, filters, filters_count);
-        continue_program();
         break;
       }
       case 99:
@@ -119,6 +125,7 @@ int main() {
       default:
         printf("Неверный выбор. Попробуйте еще раз.\n");
     }
+    continue_program();
   }
 }
 // ---------------------------------------------------------------------------------------------------------------------
@@ -134,7 +141,7 @@ void print_menu() {
   printf("1. Ввод студентов в базу данных (с очисткой)\n");
   printf("2. Вывод базы данных\n");
   printf("3. Добавить студента\n");
-  printf("4. Сортировать студентов по среднему баллу\n");
+  printf("4. Сортировка по любому столбцу\n");
   printf("5. Удалить студента по ID\n");
   printf("6. Сохранение базы данных студентов\n");
   printf("7. Загрузка базы данных студентов\n");
@@ -173,13 +180,7 @@ void continue_program() {
 // Инициализация базы данных
 void initialize_database(Student students[]) {
   for (int i = 0; i < MAX_STUDENTS; i++) {
-    students[i].id = 0;
-    students[i].original_index = 0;
-    students[i].name[0] = '\0';
-    students[i].surname[0] = '\0';
-    students[i].age = 0;
-    students[i].faculty[0] = '\0';
-    students[i].gpa = 0.0;
+    memset(&students[i], 0, sizeof(Student));
   }
 }
 
@@ -342,7 +343,6 @@ void print_database(Student students[]) {
     }
   }
   print_database_footer();
-  continue_program();
 }
 // -----Вывод базы данных-----
 
@@ -367,30 +367,6 @@ void delete_student(Student students[]) {
     }
   }
   printf("Студент с ID %d не найден.\n", id_to_delete);
-}
-
-// Сортировка студентов по среднему баллу
-void sort_students_by_gpa_and_print(Student students[]) {
-  // Создаем временный массив студентов
-  Student temp_students[MAX_STUDENTS];
-  // Копируем исходные данные во временный массив
-  for (int i = 0; i < MAX_STUDENTS; i++) {
-    temp_students[i] = students[i];
-  }
-
-  // Используем пузырьковую сортировку для сортировки временного массива
-  for (int i = 0; i < MAX_STUDENTS - 1; i++) {
-    for (int j = 0; j < MAX_STUDENTS - i - 1; j++) {
-      if (temp_students[j].gpa > temp_students[j + 1].gpa) {
-        Student temp = temp_students[j];
-        temp_students[j] = temp_students[j + 1];
-        temp_students[j + 1] = temp;
-      }
-    }
-  }
-
-  // Выводим отсортированный временный массив
-  print_database(temp_students);
 }
 
 // Настройка консоли
@@ -459,6 +435,7 @@ void load_database(Student students[]) {
 // Поиск студентов по столбцу
 void search_students(Student students[], SearchFilter filters[], int filters_count) {
   Student temp_students[MAX_STUDENTS];
+  memset(temp_students, 0, sizeof(temp_students));
   int temp_index = 0;
 
   for (int i = 0; i < MAX_STUDENTS; i++) {
@@ -492,9 +469,49 @@ void search_students(Student students[], SearchFilter filters[], int filters_cou
   }
 
   printf("Поиск студентов по заданным фильтрам:\n");
-  print_database_header();
-  for (int i = 0; i < temp_index; i++) {
-    print_student(temp_students[i]);
+  print_database(temp_students);
+}
+
+// Сортировка студентов по столбцу
+void sort_students(Student students[], char column[50], int order) {
+  // Создаем временный массив студентов
+  Student temp_students[MAX_STUDENTS];
+  // Копируем исходные данные во временный массив
+  for (int i = 0; i < MAX_STUDENTS; i++) {
+    temp_students[i] = students[i];
   }
-  print_database_footer();
+
+  // Выполняем сортировку на временном массиве
+  for (int i = 0; i < MAX_STUDENTS - 1; i++) {
+    for (int j = 0; j < MAX_STUDENTS - i - 1; j++) {
+      int should_swap = 0;
+      if (strcmp(column, "id") == 0) {
+        should_swap =
+          order == 0 ? temp_students[j].id > temp_students[j + 1].id : temp_students[j].id < temp_students[j + 1].id;
+      } else if (strcmp(column, "age") == 0) {
+        should_swap = order == 0 ? temp_students[j].age > temp_students[j + 1].age : temp_students[j].age <
+                                                                                     temp_students[j + 1].age;
+      } else if (strcmp(column, "gpa") == 0) {
+        should_swap = order == 0 ? temp_students[j].gpa > temp_students[j + 1].gpa : temp_students[j].gpa <
+                                                                                     temp_students[j + 1].gpa;
+      } else if (strcmp(column, "faculty") == 0) {
+        should_swap = order == 0 ? strcmp(temp_students[j].faculty, temp_students[j + 1].faculty) > 0 :
+                      strcmp(temp_students[j].faculty, temp_students[j + 1].faculty) < 0;
+      } else if (strcmp(column, "name") == 0) {
+        should_swap = order == 0 ? strcmp(temp_students[j].name, temp_students[j + 1].name) > 0 :
+                      strcmp(temp_students[j].name, temp_students[j + 1].name) < 0;
+      } else if (strcmp(column, "surname") == 0) {
+        should_swap = order == 0 ? strcmp(temp_students[j].surname, temp_students[j + 1].surname) > 0 :
+                      strcmp(temp_students[j].surname, temp_students[j + 1].surname) < 0;
+      }
+      if (should_swap) {
+        Student temp = temp_students[j];
+        temp_students[j] = temp_students[j + 1];
+        temp_students[j + 1] = temp;
+      }
+    }
+  }
+
+  // Выводим отсортированный временный массив
+  print_database(temp_students);
 }

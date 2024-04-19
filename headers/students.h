@@ -41,12 +41,12 @@ void print_database_header();
 void print_database_footer();
 void print_database(Student students[]);
 void delete_student(Student students[]);
-void sort_students_by_gpa_and_print(Student students[]);
 void settings_screen();
 void to_string(int, char *str);
 int id_exists(Student students[], int);
 void save_database(Student students[]);
 void load_database(Student students[]);
 void search_students(Student students[], SearchFilter filters[], int filters_count);
+void sort_students (Student students[], char column[50], int order);
 
 #endif //MAIN_C_STUDENTS_H
