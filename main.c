@@ -432,6 +432,27 @@ void load_database(Student students[]) {
   printf("База данных успешно загружена из файла db.dat.\n");
 }
 
+// Проверка на соответствие фильтру
+int matches_filter(Student student, SearchFilter filter) {
+  if (strcmp(filter.column, "id") == 0) {
+    return student.id >= filter.num_from && student.id <= filter.num_to;
+  } else if (strcmp(filter.column, "age") == 0) {
+    return student.age >= filter.num_from && student.age <= filter.num_to;
+  } else if (strcmp(filter.column, "gpa") == 0) {
+    return student.gpa >= filter.num_from && student.gpa <= filter.num_to;
+  } else if (strcmp(filter.column, "faculty") == 0) {
+    return strncasecmp(student.faculty, filter.str_from, strlen(filter.str_from)) >= 0 &&
+           strncasecmp(student.faculty, filter.str_to, strlen(filter.str_to)) <= 0;
+  } else if (strcmp(filter.column, "name") == 0) {
+    return strncasecmp(student.name, filter.str_from, strlen(filter.str_from)) >= 0 &&
+           strncasecmp(student.name, filter.str_to, strlen(filter.str_to)) <= 0;
+  } else if (strcmp(filter.column, "surname") == 0) {
+    return strncasecmp(student.surname, filter.str_from, strlen(filter.str_from)) >= 0 &&
+           strncasecmp(student.surname, filter.str_to, strlen(filter.str_to)) <= 0;
+  }
+  return 0;
+}
+
 // Поиск студентов по столбцу
 void search_students(Student students[], SearchFilter filters[], int filters_count) {
   Student temp_students[MAX_STUDENTS];
@@ -442,22 +463,7 @@ void search_students(Student students[], SearchFilter filters[], int filters_cou
     if (strlen(students[i].name) != 0) {
       int matches_all_filters = 1;
       for (int j = 0; j < filters_count; j++) {
-        SearchFilter filter = filters[j];
-        if (!(
-          (strcmp(filter.column, "id") == 0 && students[i].id >= filter.num_from && students[i].id <= filter.num_to) ||
-          (strcmp(filter.column, "age") == 0 && students[i].age >= filter.num_from &&
-           students[i].age <= filter.num_to) ||
-          (strcmp(filter.column, "gpa") == 0 && students[i].gpa >= filter.num_from &&
-           students[i].gpa <= filter.num_to) ||
-          (strcmp(filter.column, "faculty") == 0 &&
-           (strncasecmp(students[i].faculty, filter.str_from, strlen(filter.str_from)) >= 0 &&
-            strncasecmp(students[i].faculty, filter.str_to, strlen(filter.str_to)) <= 0)) ||
-          (strcmp(filter.column, "name") == 0 &&
-           (strncasecmp(students[i].name, filter.str_from, strlen(filter.str_from)) >= 0 &&
-            strncasecmp(students[i].name, filter.str_to, strlen(filter.str_to)) <= 0)) ||
-          (strcmp(filter.column, "surname") == 0 &&
-           (strncasecmp(students[i].surname, filter.str_from, strlen(filter.str_from)) >= 0 &&
-            strncasecmp(students[i].surname, filter.str_to, strlen(filter.str_to)) <= 0)))) {
+        if (!matches_filter(students[i], filters[j])) {
           matches_all_filters = 0;
           break;
         }
@@ -472,39 +478,34 @@ void search_students(Student students[], SearchFilter filters[], int filters_cou
   print_database(temp_students);
 }
 
+// Проверка на необходимость смены местами
+int should_swap(Student a, Student b, char column[50], int order) {
+  if (strcmp(column, "id") == 0) {
+    return order == 0 ? a.id > b.id : a.id < b.id;
+  } else if (strcmp(column, "age") == 0) {
+    return order == 0 ? a.age > b.age : a.age < b.age;
+  } else if (strcmp(column, "gpa") == 0) {
+    return order == 0 ? a.gpa > b.gpa : a.gpa < b.gpa;
+  } else if (strcmp(column, "faculty") == 0) {
+    return order == 0 ? strcmp(a.faculty, b.faculty) > 0 : strcmp(a.faculty, b.faculty) < 0;
+  } else if (strcmp(column, "name") == 0) {
+    return order == 0 ? strcmp(a.name, b.name) > 0 : strcmp(a.name, b.name) < 0;
+  } else if (strcmp(column, "surname") == 0) {
+    return order == 0 ? strcmp(a.surname, b.surname) > 0 : strcmp(a.surname, b.surname) < 0;
+  }
+  return 0;
+}
+
 // Сортировка студентов по столбцу
 void sort_students(Student students[], char column[50], int order) {
-  // Создаем временный массив студентов
   Student temp_students[MAX_STUDENTS];
-  // Копируем исходные данные во временный массив
   for (int i = 0; i < MAX_STUDENTS; i++) {
     temp_students[i] = students[i];
   }
 
-  // Выполняем сортировку на временном массиве
   for (int i = 0; i < MAX_STUDENTS - 1; i++) {
     for (int j = 0; j < MAX_STUDENTS - i - 1; j++) {
-      int should_swap = 0;
-      if (strcmp(column, "id") == 0) {
-        should_swap =
-          order == 0 ? temp_students[j].id > temp_students[j + 1].id : temp_students[j].id < temp_students[j + 1].id;
-      } else if (strcmp(column, "age") == 0) {
-        should_swap = order == 0 ? temp_students[j].age > temp_students[j + 1].age : temp_students[j].age <
-                                                                                     temp_students[j + 1].age;
-      } else if (strcmp(column, "gpa") == 0) {
-        should_swap = order == 0 ? temp_students[j].gpa > temp_students[j + 1].gpa : temp_students[j].gpa <
-                                                                                     temp_students[j + 1].gpa;
-      } else if (strcmp(column, "faculty") == 0) {
-        should_swap = order == 0 ? strcmp(temp_students[j].faculty, temp_students[j + 1].faculty) > 0 :
-                      strcmp(temp_students[j].faculty, temp_students[j + 1].faculty) < 0;
-      } else if (strcmp(column, "name") == 0) {
-        should_swap = order == 0 ? strcmp(temp_students[j].name, temp_students[j + 1].name) > 0 :
-                      strcmp(temp_students[j].name, temp_students[j + 1].name) < 0;
-      } else if (strcmp(column, "surname") == 0) {
-        should_swap = order == 0 ? strcmp(temp_students[j].surname, temp_students[j + 1].surname) > 0 :
-                      strcmp(temp_students[j].surname, temp_students[j + 1].surname) < 0;
-      }
-      if (should_swap) {
+      if (should_swap(temp_students[j], temp_students[j + 1], column, order)) {
         Student temp = temp_students[j];
         temp_students[j] = temp_students[j + 1];
         temp_students[j + 1] = temp;
@@ -512,6 +513,5 @@ void sort_students(Student students[], char column[50], int order) {
     }
   }
 
-  // Выводим отсортированный временный массив
   print_database(temp_students);
 }
