@@ -36,6 +36,7 @@ void add_student(Student students[]);
 void delete_student(Student students[]);
 void save_database(Student students[]);
 void load_database(Student students[]);
+void confirm_and_add_student(Student students[], Student new_student);
 
 // Функции ввода данных
 int input_id(Student students[]);
@@ -57,7 +58,7 @@ void clear_input_buffer();
 void clear_screen();
 void continue_program();
 void settings_screen();
-void to_string(int num, char *str);
+int is_all_digits(const char *str);
 int id_exists(Student students[], int id);
 
 #endif //MAIN_C_STUDENTS_H

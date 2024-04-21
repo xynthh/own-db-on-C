@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <ctype.h>
 #include "headers/students.h"
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -42,10 +43,7 @@ int main() {
         int order;
         printf("Введите столбец для сортировки (id, age, gpa, faculty, name, surname): ");
         fgets(column, 50, stdin);
-        char *newline = strrchr(column, '\n');
-        if (newline) {
-          *newline = '\0'; // Удаление символа новой строки
-        }
+        column[strcspn(column, "\n")] = 0; // Удаление символа новой строки
         printf("Введите порядок сортировки (1 - по возрастанию, 0 - по убыванию): ");
         scanf_s("%d", &order);
         clear_input_buffer();
@@ -72,24 +70,16 @@ int main() {
 
           printf("Введите столбец для поиска (id, age, gpa, faculty, name, surname): ");
           fgets(column, 50, stdin);
-          char *newline = strrchr(column, '\n');
-          if (newline) {
-            *newline = '\0'; // Удаление символа новой строки
-          }
+          column[strcspn(column, "\n")] = 0; // Удаление символа новой строки
 
           if (strcmp(column, "faculty") == 0 || strcmp(column, "name") == 0 || strcmp(column, "surname") == 0) {
             printf("Введите начальное значение для поиска: ");
             fgets(str_from, 50, stdin);
-            newline = strrchr(str_from, '\n');
-            if (newline) {
-              *newline = '\0'; // Удаление символа новой строки
-            }
+            str_from[strcspn(str_from, "\n")] = 0; // Удаление символа новой строки
+
             printf("Введите конечное значение для поиска: ");
             fgets(str_to, 50, stdin);
-            newline = strrchr(str_to, '\n');
-            if (newline) {
-              *newline = '\0'; // Удаление символа новой строки
-            }
+            str_to[strcspn(str_to, "\n")] = 0; // Удаление символа новой строки
           } else {
             printf("Введите нижнюю границу диапазона: ");
             scanf_s("%lf", &num_from);
@@ -194,103 +184,141 @@ int find_free_slot(Student students[]) {
   return -1;
 }
 
+// Проверка на то, что строка состоит только из цифр
+int is_all_digits(const char *str) {
+  for (int i = 0; str[i] != '\0'; i++) {
+    if (!isdigit(str[i])) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
 // -----Добавление студента в базу данных-----
 int input_id(Student students[]) {
-  int id;
-  char id_str[50];
+  clear_screen();
+  char input[50];
+  char *endptr;
   do {
-    printf("Введите ID студента: ");
-    user_input();
-    scanf_s("%d", &id);
-    clear_input_buffer();
-    to_string(id, id_str);
-    if (id <= 0 || strlen(id_str) > 6 || id_exists(students, id)) {
-      printf(
-        "ID студента должен быть больше 0, содержать не более 6 символов и быть уникальным. Попробуйте еще раз.\n\n");
+    printf("Введите ID( студак ) студента: ");
+    fgets(input, 50, stdin);
+    input[strcspn(input, "\n")] = 0; // Удаление символа новой строки
+
+    if (is_all_digits(input)) {
+      long id = strtol(input, &endptr, 10);
+      if (*endptr != '\0' || id <= 0 || strlen(input) > 6 || id_exists(students, id)) {
+        printf(
+          "ID студента должен быть больше 0, содержать не более 6 символов и быть уникальным. Попробуйте еще раз.\n\n");
+      } else {
+        clear_screen();
+        return (int) id;
+      }
     } else {
-      break;
+      printf("ID студента должен быть числом. Попробуйте еще раз.\n\n");
     }
   } while (1);
-  return id;
 }
 
 void input_name(char *name) {
   do {
-    printf("\nВведите имя студента: ");
-    user_input();
+    printf("Введите имя студента: ");
     fgets(name, 50, stdin);
-    char *newline = strrchr(name, '\n');
-    if (newline) {
-      *newline = '\0'; // Удаление символа новой строки
-    }
+    name[strcspn(name, "\n")] = 0; // Удаление символа новой строки
     if (strlen(name) == 0 || strlen(name) > 20) {
       printf("Имя студента не может быть пустым или содержать больше 20 символов. Попробуйте еще раз.\n\n");
     } else {
       break;
     }
   } while (1);
+  clear_screen();
 }
 
 void input_surname(char *surname) {
   do {
-    printf("\nВведите фамилию студента: ");
-    user_input();
+    printf("Введите фамилию студента: ");
     fgets(surname, 50, stdin);
-    char *newline = strrchr(surname, '\n');
-    if (newline) {
-      *newline = '\0'; // Удаление символа новой строки
-    }
+    surname[strcspn(surname, "\n")] = 0; // Удаление символа новой строки
     if (strlen(surname) == 0 || strlen(surname) > 20) {
       printf("Фамилия студента не может быть пустой или содержать больше 20 символов. Попробуйте еще раз.\n\n");
     } else {
       break;
     }
   } while (1);
+  clear_screen();
 }
 
 void input_age(int *age) {
+  char input[50];
+  char *endptr;
   do {
-    printf("\nВведите возраст студента: ");
-    user_input();
-    scanf_s("%d", age);
-    clear_input_buffer();
-    if (*age <= 16 || *age > 99) {
-      printf("Возраст студента должен быть больше 16 и меньше 99. Попробуйте еще раз.\n\n");
+    printf("Введите возраст студента: ");
+    fgets(input, 50, stdin);
+    input[strcspn(input, "\n")] = 0; // Удаление символа новой строки
+
+    if (is_all_digits(input)) {
+      long temp_age = strtol(input, &endptr, 10);
+      if (*endptr != '\0' || temp_age <= 16 || temp_age > 99) {
+        printf("Возраст студента должен быть больше 16 и меньше 99. Попробуйте еще раз.\n\n");
+      } else {
+        clear_screen();
+        *age = (int) temp_age;
+        return;
+      }
     } else {
-      break;
+      printf("Возраст студента должен быть числом. Попробуйте еще раз.\n\n");
     }
   } while (1);
 }
 
 void input_faculty(char *faculty) {
   do {
-    printf("\nВведите факультет студента: ");
-    user_input();
+    printf("Введите факультет студента: ");
     fgets(faculty, 100, stdin);
-    char *newline = strrchr(faculty, '\n');
-    if (newline) {
-      *newline = '\0'; // Удаление символа новой строки
-    }
+    faculty[strcspn(faculty, "\n")] = 0; // Удаление символа новой строки
     if (strlen(faculty) == 0 || strlen(faculty) > 20) {
       printf("Факультет студента не может быть пустым или содержать больше 20 символов. Попробуйте еще раз.\n\n");
     } else {
       break;
     }
   } while (1);
+  clear_screen();
 }
 
 void input_gpa(double *gpa) {
+  char input[50];
+  char *endptr;
   do {
-    printf("\nВведите средний балл студента: ");
-    user_input();
-    scanf_s("%lf", gpa);
-    clear_input_buffer();
-    if (*gpa <= 0 || *gpa > 54) {
-      printf("Средний балл студента должен быть больше 0 и меньше или равен 54. Попробуйте еще раз.\n\n");
+    printf("Введите средний балл студента: ");
+    fgets(input, 50, stdin);
+    input[strcspn(input, "\n")] = 0; // Удаление символа новой строки
+
+    double temp_gpa = strtod(input, &endptr);
+    if (*endptr != '\0' || temp_gpa <= 0.0 || temp_gpa > 54.0) {
+      printf("Средний балл студента должен быть больше 0.0 и меньше или равен 54. Попробуйте еще раз.\n\n");
     } else {
-      break;
+      clear_screen();
+      *gpa = temp_gpa;
+      return;
     }
   } while (1);
+}
+
+void confirm_and_add_student(Student students[], Student new_student) {
+  printf("\nПроверьте введенные данные:\n");
+  printf("ID студента: %d\n", new_student.id);
+  printf("Имя студента: %s\n", new_student.name);
+  printf("Фамилия студента: %s\n", new_student.surname);
+  printf("Возраст студента: %d\n", new_student.age);
+  printf("Факультет студента: %s\n", new_student.faculty);
+  printf("Средний балл студента: %.2f\n\n", new_student.gpa);
+
+  printf("Все верно? (1 - да, 0 - нет): ");
+  if (get_user_choice() == 1) {
+    students[new_student.original_index] = new_student;
+    printf("Студент успешно добавлен.\n\n");
+  } else {
+    printf("Студент не добавлен.\n\n");
+  }
 }
 
 void add_student(Student students[]) {
@@ -309,8 +337,7 @@ void add_student(Student students[]) {
   input_faculty(new_student.faculty);
   input_gpa(&new_student.gpa);
 
-  students[index] = new_student;
-  printf("Студент успешно добавлен.\n\n");
+  confirm_and_add_student(students, new_student);
 }
 // -----Добавление студента в базу данных-----
 
@@ -374,11 +401,6 @@ void settings_screen() {
   SetConsoleCP(CP_UTF8);
   SetConsoleOutputCP(CP_UTF8);
   SetConsoleTitle("OSDB");
-}
-
-// Преобразование числа в строку
-void to_string(int num, char *str) {
-  sprintf(str, "%d", num);
 }
 
 // Проверка наличия ID в базе данных
