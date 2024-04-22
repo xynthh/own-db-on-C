@@ -12,6 +12,8 @@ int main() {
   initialize_database(students);
   clear_screen();
 
+  int is_pg = 0;
+
   while (1) {
     print_menu();
     int choice = get_user_choice();
@@ -28,92 +30,103 @@ int main() {
           while (1) {
             add_student(students);
             printf("Добавить еще одного студента? (1 - да, 0 - нет): ");
-            if (get_user_choice() != 1) break;
+            if (get_user_choice() != 1) {
+              is_pg = 1;
+              break;
+            }
           }
         }
-        break;
-      case 2:
-        print_database(students);
-        break;
-      case 3:
-        add_student(students);
-        break;
-      case 4: {
-        char column[50];
-        int order;
-        printf("Введите столбец для сортировки (id, age, gpa, faculty, name, surname): ");
-        fgets(column, 50, stdin);
-        column[strcspn(column, "\n")] = 0; // Удаление символа новой строки
-        printf("Введите порядок сортировки (1 - по возрастанию, 0 - по убыванию): ");
-        scanf_s("%d", &order);
-        clear_input_buffer();
-        sort_students(students, column, order);
-        break;
-      }
-      case 5:
-        delete_student(students);
-        break;
-      case 6:
-        save_database(students);
         break;
       case 7:
         load_database(students);
+        is_pg = 1;
         break;
-      case 8: {
-        SearchFilter filters[MAX_STUDENTS];
-        int filters_count = 0;
-
-        while (1) {
-          char column[50];
-          char str_from[50] = "", str_to[50] = "";
-          double num_from = 0, num_to = 0;
-
-          printf("Введите столбец для поиска (id, age, gpa, faculty, name, surname): ");
-          fgets(column, 50, stdin);
-          column[strcspn(column, "\n")] = 0; // Удаление символа новой строки
-
-          if (strcmp(column, "faculty") == 0 || strcmp(column, "name") == 0 || strcmp(column, "surname") == 0) {
-            printf("Введите начальное значение для поиска: ");
-            fgets(str_from, 50, stdin);
-            str_from[strcspn(str_from, "\n")] = 0; // Удаление символа новой строки
-
-            printf("Введите конечное значение для поиска: ");
-            fgets(str_to, 50, stdin);
-            str_to[strcspn(str_to, "\n")] = 0; // Удаление символа новой строки
-          } else {
-            printf("Введите нижнюю границу диапазона: ");
-            scanf_s("%lf", &num_from);
-            printf("Введите верхнюю границу диапазона: ");
-            scanf_s("%lf", &num_to);
-            clear_input_buffer();
-          }
-
-          SearchFilter filter;
-          strcpy(filter.column, column);
-          strcpy(filter.str_from, str_from);
-          strcpy(filter.str_to, str_to);
-          filter.num_from = num_from;
-          filter.num_to = num_to;
-
-          filters[filters_count++] = filter;
-
-          printf("Добавить еще один фильтр? (1 - да, 0 - нет): ");
-          if (get_user_choice() != 1) {
-            printf("\nВсе фильтры добавлены.\n");
-            break;
-          } else {
-            printf("\n");
-          }
-        }
-
-        search_students(students, filters, filters_count);
-        break;
-      }
-      case 99:
+      case 9:
         printf("Выход из программы.\n");
         exit(0);
       default:
-        printf("Неверный выбор. Попробуйте еще раз.\n");
+        if (!is_pg) {
+          printf("База данных пуста. Пожалуйста, введите студентов перед использованием других функций.\n");
+          continue;
+        }
+        switch (choice) {
+          case 2:
+            print_database(students);
+            break;
+          case 3:
+            add_student(students);
+            break;
+          case 4: {
+            char column[50];
+            int order;
+            printf("Введите столбец для сортировки (id, age, gpa, faculty, name, surname): ");
+            fgets(column, 50, stdin);
+            column[strcspn(column, "\n")] = 0; // Удаление символа новой строки
+            printf("Введите порядок сортировки (1 - по возрастанию, 0 - по убыванию): ");
+            scanf_s("%d", &order);
+            clear_input_buffer();
+            sort_students(students, column, order);
+            break;
+          }
+          case 5:
+            delete_student(students);
+            break;
+          case 6:
+            save_database(students);
+            break;
+          case 8: {
+            SearchFilter filters[MAX_STUDENTS];
+            int filters_count = 0;
+
+            while (1) {
+              char column[50];
+              char str_from[50] = "", str_to[50] = "";
+              double num_from = 0, num_to = 0;
+
+              printf("Введите столбец для поиска (id, age, gpa, faculty, name, surname): ");
+              fgets(column, 50, stdin);
+              column[strcspn(column, "\n")] = 0; // Удаление символа новой строки
+
+              if (strcmp(column, "faculty") == 0 || strcmp(column, "name") == 0 || strcmp(column, "surname") == 0) {
+                printf("Введите начальное значение для поиска: ");
+                fgets(str_from, 50, stdin);
+                str_from[strcspn(str_from, "\n")] = 0; // Удаление символа новой строки
+
+                printf("Введите конечное значение для поиска: ");
+                fgets(str_to, 50, stdin);
+                str_to[strcspn(str_to, "\n")] = 0; // Удаление символа новой строки
+              } else {
+                printf("Введите нижнюю границу диапазона: ");
+                scanf_s("%lf", &num_from);
+                printf("Введите верхнюю границу диапазона: ");
+                scanf_s("%lf", &num_to);
+                clear_input_buffer();
+              }
+
+              SearchFilter filter;
+              strcpy(filter.column, column);
+              strcpy(filter.str_from, str_from);
+              strcpy(filter.str_to, str_to);
+              filter.num_from = num_from;
+              filter.num_to = num_to;
+
+              filters[filters_count++] = filter;
+
+              printf("Добавить еще один фильтр? (1 - да, 0 - нет): ");
+              if (get_user_choice() != 1) {
+                printf("\nВсе фильтры добавлены.\n");
+                break;
+              } else {
+                printf("\n");
+              }
+            }
+
+            search_students(students, filters, filters_count);
+            break;
+          }
+          default:
+            printf("Неверный выбор. Попробуйте еще раз.\n");
+        }
     }
     continue_program();
   }
@@ -136,7 +149,7 @@ void print_menu() {
   printf("6. Сохранение базы данных студентов\n");
   printf("7. Загрузка базы данных студентов\n");
   printf("8. Поиск студентов по столбцу с ограничением от и до\n");
-  printf("99. Выход\n");
+  printf("9. Выход\n");
   user_input();
 }
 
