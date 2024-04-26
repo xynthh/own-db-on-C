@@ -98,6 +98,7 @@ int main() {
               } else {
                 printf("Введите нижнюю границу диапазона: ");
                 scanf_s("%lf", &num_from);
+                clear_input_buffer();
                 printf("Введите верхнюю границу диапазона: ");
                 scanf_s("%lf", &num_to);
                 clear_input_buffer();
@@ -198,7 +199,7 @@ int find_free_slot(Student students[]) {
 }
 
 // Проверка на то, что строка состоит только из цифр
-int is_all_digits(const char *str) {
+int is_all_digits(char *str) {
   for (int i = 0; str[i] != '\0'; i++) {
     if (!isdigit(str[i])) {
       return 0;
@@ -305,13 +306,17 @@ void input_gpa(double *gpa) {
     fgets(input, 50, stdin);
     input[strcspn(input, "\n")] = 0; // Удаление символа новой строки
 
-    double temp_gpa = strtod(input, &endptr);
-    if (*endptr != '\0' || temp_gpa <= 0.0 || temp_gpa > 54.0) {
-      printf("Средний балл студента должен быть больше 0.0 и меньше или равен 54. Попробуйте еще раз.\n\n");
+    if (is_all_digits(input)) {
+      double temp_gpa = strtod(input, &endptr);
+      if (*endptr != '\0' || temp_gpa <= 0.0 || temp_gpa > 54.0) {
+        printf("Средний балл студента должен быть больше 0.0 и меньше или равен 54. Попробуйте еще раз.\n\n");
+      } else {
+        clear_screen();
+        *gpa = temp_gpa;
+        return;
+      }
     } else {
-      clear_screen();
-      *gpa = temp_gpa;
-      return;
+      printf("Средний балл студента должен быть числом. Попробуйте еще раз.\n\n");
     }
   } while (1);
 }
@@ -395,13 +400,7 @@ void delete_student(Student students[]) {
 
   for (int i = 0; i < MAX_STUDENTS; i++) {
     if (students[i].id == id_to_delete) {
-      students[i].id = 0;
-      students[i].original_index = 0;
-      students[i].name[0] = '\0';
-      students[i].surname[0] = '\0';
-      students[i].age = 0;
-      students[i].faculty[0] = '\0';
-      students[i].gpa = 0.0;
+      memset(&students[i], 0, sizeof(Student));
       printf("Студент с ID %d удален.\n", id_to_delete);
       return;
     }
@@ -509,8 +508,13 @@ void search_students(Student students[], SearchFilter filters[], int filters_cou
     }
   }
 
-  printf("Поиск студентов по заданным фильтрам:\n");
-  print_database(temp_students);
+  if (temp_index == 0) {
+    printf("По вашему запросу ничего не найдено.\n");
+    return;
+  } else {
+    printf("Поиск студентов по заданным фильтрам:\n");
+    print_database(temp_students);
+  }
 }
 
 // Проверка на необходимость смены местами

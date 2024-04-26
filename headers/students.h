@@ -58,7 +58,7 @@ void clear_input_buffer();
 void clear_screen();
 void continue_program();
 void settings_screen();
-int is_all_digits(const char *str);
+int is_all_digits(char *str);
 int id_exists(Student students[], int id);
 
 #endif //MAIN_C_STUDENTS_H
